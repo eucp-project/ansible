@@ -1,0 +1,21 @@
+# Pinch a few holes in the firewall
+- name: Set up the firewall
+  block:
+    - ufw:
+        state: enabled
+    - ufw:
+        rule: allow
+        to_port: 443
+    - ufw:
+        rule: allow
+        to_port: 80
+    # Docker - Hub connection
+    - ufw:
+        rule: allow
+        to_port: 8081
+#   # THREDDS server with ssl, but for internal use only
+#   - ufw:
+#       rule: allow
+#       from: 145.100.56.0/22
+#       to_port: 8088
+#ufw allow from 145.100.56.0/22 to any port 8088

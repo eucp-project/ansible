@@ -1,0 +1,46 @@
+- name: Set up Jupyter account and configuration
+  block:
+    - group:
+        name: jupyterhub
+        state: present
+    - user:
+        name: jupyterhub
+        group: jupyterhub
+        # Need shadow for PAM authentication
+        groups: [shadow, docker]
+        create_home: yes
+        home: /etc/jupyterhub
+        password: !
+        shell: /bin/bash
+        state: present
+
+    - file:
+        path: "{{ item }}"
+        state: directory
+        owner: jupyterhub
+        group: jupyterhub
+      loop: [/srv/jupyterhub, /etc/jupyterhub]
+
+    - template:
+        src: systemgroupspawner.py
+        dest: /etc/jupyterhub/systemgroupspawner.py
+        mode: 0644
+        owner: jupyterhub
+        group: jupyterhub
+
+    - template:
+        src: jupyterhub_config.py
+        dest: /etc/jupyterhub/jupyterhub_config.py
+        mode: 0644
+        owner: jupyterhub
+        group: jupyterhub
+
+    # Note: not necessary with the SystemUser/GroupSpawner; kept
+    # in case we'd like to switch back to the SudoSpawner
+    - copy:
+        dest: /opt/conda/bin/sudospawner-singleuser
+        mode: 0755
+        content: |
+          #!/bin/bash -l
+          # Delegate the notebook server launch to the jupyter-labhub script.
+          exec "jupyter-labhub" $@

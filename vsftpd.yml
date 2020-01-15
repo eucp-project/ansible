@@ -1,0 +1,80 @@
+- name: Install vsftpd
+  apt:
+    name: [vsftpd]
+
+# Stop vsftpd service before making changes
+- name: Stop vsftpd service
+  systemd:
+    name: vsftpd
+    state: stopped
+
+- name: Add ftpupload user
+  user:
+    name: ftpupload
+    group: ftp
+    # Need shadow for PAM authentication
+    groups: [shadow, docker]
+    create_home: no
+    password: !
+    state: present
+
+- name: Set up vsftpd configuration file
+  template:
+    src: vsftpd.conf
+    dest: /etc/vsftpd.conf
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Create ftp home directory
+  file:
+    path: /mnt/data/data1/ftp
+    state: directory
+    owner: ftp
+    group: ftp
+    mode: 0500
+
+- name: Create ftp upload directory
+  file:
+    path: /mnt/data/data1/ftp/uploads
+    state: directory
+    owner: ftp
+    group: ftp
+    mode: 0755
+
+- name: copy vsftpd home directory README
+  template:
+    src: vsftpd-readme-home.txt
+    dest: /mnt/data/data1/ftp/README
+    mode: 0644
+    owner: ftp
+    group: ftp
+
+- name: copy vsftpd uploads directory README
+  template:
+    src: vsftpd-readme-uploads.txt
+    dest: /mnt/data/data1/ftp/uploads/README
+    mode: 0644
+    owner: ftp
+    group: ftp
+
+- name: allow ftp through the firewall
+  ufw:
+    rule: allow
+    proto: tcp
+    port: '{{ item }}'
+  with_items: [20, 21]
+
+- name: set ftp passive range
+  ufw:
+    rule: allow
+    proto: tcp
+    port: '{{ item }}'
+  with_items: [10090, 10091, 10092, 10093, 10094, 10095,
+               10096, 10097, 10098, 10099, 10100]
+
+# Stop vsftpd service before making changes
+- name: Start vsftpd service
+  systemd:
+    name: vsftpd
+    state: started

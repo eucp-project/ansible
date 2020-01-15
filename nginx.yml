@@ -1,0 +1,43 @@
+# Following https://jupyterhub.readthedocs.io/en/stable/reference/config-proxy.html
+# Have a Letsencrypt certificate installed first; see letsencrypt.yml
+
+- name: Install nginx
+  apt:
+    name: [nginx, libnginx-mod-http-auth-pam]
+
+- name: Create JupyterHub nginx configuration file
+  template:
+    src: nginx-conf/jupyterhub.conf
+    dest: /etc/nginx/sites-available/jupyterhub.conf
+    mode: 0644
+
+- name: Create JupyterHub includes directory
+  file:
+    path: /etc/nginx/includes
+    state: directory
+    recurse: yes
+    mode: 0755
+
+- name: Copy nginx include files
+  template:
+    src: nginx-conf/includes/{{ item }}
+    dest: /etc/nginx/includes/{{ item }}
+    mode: 0644
+  loop: [certificates.conf lab_help.conf thredds.conf jupyterhub.conf]
+
+- name: Symlink JupyterHub nginx configuration file to active sites
+  file:
+    src: /etc/nginx/sites-available/jupyterhub.conf
+    dest: /etc/nginx/sites-enabled/jupyterhub.conf
+    state: link
+
+- name: Add www-data to shadow, to be able to read the password file for PAM authentication
+  shell: usermod -a -G shadow www-data
+
+- name: Store PAM user and group access restrictions for Nginx - THREDDS access
+  file:
+    src: nginx-conf/pam/{{ item }}
+    dest: /etc/pam.d/{{ item }}
+  loop:
+    - nginx_restricted_cp-rcm
+    - nginx_restricted_groups_cp-rcm

@@ -1,0 +1,12 @@
+- name: Update sshd config to allow ssh for accounts in the users group
+  block:
+  - blockinfile:
+      path: /etc/ssh/sshd_config
+      block: |
+        Match Group users
+          PasswordAuthentication yes
+        Match All
+  - systemd:
+      name: sshd
+      enabled: yes
+      state: restarted

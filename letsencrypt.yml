@@ -1,0 +1,62 @@
+- name: Generate Diffie Hellman parameters; takes a few minutes
+  shell: openssl dhparam -out /etc/ssl/certs/dhparam.pem 4096
+  args:
+    creates: /etc/ssl/certs/dhparam.pem
+
+- name: Test for existing certificate tar file
+  local_action: stat path={{ servername }}-certs.tar
+  become: false
+  register: certtarfile
+
+- name: Test for existing certificate on server
+  stat:
+    path: /etc/letsencrypt/archive/{{ servername }}/privkey1.pem
+  register: certfile
+
+- name: Test for existing live directory
+  stat:
+    path: /etc/letsencrypt/live/{{ servername }}
+  register: livedir
+
+- name: Set up Letsencrypt license
+  block:
+    - apt:
+        name: [letsencrypt]
+    - shell:
+        certbot certonly --standalone -d {{ servername }} -n --agree-tos -m {{ adminemail }}
+    # When JupyterHub is run standalone (without Nginx),
+    # the jupyterhub accounts needs to be able to read the certificate
+    # Ensure the base directory is readable by all, and
+    # let the JupyterHub account own the relevant subdirectory
+    # For use with Nginx, root permissions are fine.
+    #- file:
+    #    path:  /etc/letsencrypt/archive
+    #    mode: 0755
+    #- file:
+    #    path: /etc/letsencrypt/archive/{{ servername }}
+    #    owner: jupyterhub
+    #    group: jupyterhub
+  when: not (certtarfile.stat.exists or certfile.stat.exists)
+
+- name: Copy and untar existing certificates
+  block:
+    - file:
+        path: /etc/letsencrypt/archive/{{ servername }}/
+        state: directory
+    - unarchive:
+        src: "{{ servername }}-certs.tar"
+        dest: /etc/letsencrypt/archive/{{ servername }}/
+        group: root
+        owner: root
+  when: certtarfile.stat.exists and not certfile.stat.exists
+
+- name: Create link for live directory with certificates
+  block:
+    - file:
+        path: /etc/letsencrypt/live
+        state: directory
+    - file:
+        src: /etc/letsencrypt/archive/{{ servername }}
+        dest: /etc/letsencrypt/live/{{ servername }}
+        state: link
+  when: not livedir.stat.exists

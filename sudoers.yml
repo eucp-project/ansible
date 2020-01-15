@@ -1,0 +1,17 @@
+- name: Set up /etc/sudoers
+  block:
+    - command: cp -f /etc/sudoers /etc/sudoers.tmp
+      args:
+        creates: /etc/sudoers.tmp
+    - command: cp -f /etc/sudoers /etc/sudoers.bak
+    - lineinfile:
+        path: /etc/sudoers.tmp
+        state: present
+        line: "{{ item }}"
+      loop:
+        - 'Cmnd_Alias JUPYTER_CMD = /opt/conda/bin/sudospawner'
+        - '%jupyterhub ALL=(jupyterhub) /usr/bin/sudo'
+        - 'jupyterhub ALL=(%jupyterhub) NOPASSWD:JUPYTER_CMD'
+    - shell: visudo -q -c -f /etc/sudoers.tmp && cp -f /etc/sudoers.tmp /etc/sudoers && rm -f /etc/sudoers.tmp
+      args:
+        removes: /etc/sudoers.tmp

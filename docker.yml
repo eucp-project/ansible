@@ -1,0 +1,28 @@
+- name: Install Docker
+  apt:
+    name: [docker.io]
+
+- name: Stop Docker service
+  systemd:
+     name: docker
+     state: stopped
+
+- name: Set Docker system directory with enough space
+  copy:
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: 0644
+    content: |
+      {
+        "graph":"/mnt/data/data1/docker"
+      }
+
+- name: Start Docker service
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+
+- name: Prepull the Docker image
+  shell: docker pull {{ docker_image }}

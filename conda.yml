@@ -1,0 +1,43 @@
+# We use Conda instead of
+# - OS packages: not all packages are available, and some may be very outdated
+# - pip packages: this may cause problems with library dependencies
+#
+# Only the basic packages will be installed; everything else is
+# available through the Jupyter docker container.
+
+- name: Install Conda, JupyterHub & related packages
+  block:
+    # Note: there is an Ansible Conda module, but it's not core
+    # Instead, the following relies on files or directories being created
+    - get_url:
+        url: https://repo.continuum.io/miniconda/Miniconda3-3.7.0-Linux-x86_64.sh
+        dest: /tmp
+    - command: bash /tmp/Miniconda3-3.7.0-Linux-x86_64.sh -b -p /opt/conda
+      args:
+        creates: /opt/conda
+    - command: /opt/conda/bin/conda update --yes --quiet conda
+    - command: /opt/conda/bin/conda install --yes --quiet --channel conda-forge python=3.6
+      args:
+        creates: /opt/conda/lib/python3.6/
+    - command: /opt/conda/bin/conda install --yes --quiet --channel conda-forge {{ item }}
+      args:
+        creates: /opt/conda/pkgs/{{ item }}-*bz2
+      # TODO: fix version numbers for each package once we have a full and compatible installation
+      # This may speed up conda trying to match dependencies
+      # TODO2: install all packages at once; this may speed up resolving dependencies
+      loop:
+        - jupyterhub
+        - notebook
+        - jupyterlab
+        - sudospawner
+        - dockerspawner
+        - numpy
+        - scipy
+        - matplotlib
+        - netcdf4
+        - pandas
+
+    - file:
+        path: /opt/conda
+        mode: u=rwX,g=rX,o=rX
+        recurse: yes

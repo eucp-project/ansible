@@ -1,0 +1,4 @@
+mounts:
+  - { dir: subdir1, dev: vdb }
+  - { dir: subdir2, dev: vdc }
+  - { dir: subdir3, dev: vdd }

@@ -1,0 +1,4 @@
+users:
+  - { user: user_a, group: group1 }
+  - { user: user_b, group: group1 }
+  - { user: user_c, group: group2 }

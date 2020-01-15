@@ -1,0 +1,4 @@
+auth    sufficient   /lib/x86_64-linux-gnu/security/pam_listfile.so onerr=fail item=group \
+                     sense=allow file=/etc/pam.d/nginx_restricted_groups_cp-rcm
+#auth    sufficient   /lib/x86_64-linux-gnu/security/pam_listfile.so onerr=fail item=user \
+#                     sense=allow file=/etc/pam.d/nginx_restricted_users_cp-rcm

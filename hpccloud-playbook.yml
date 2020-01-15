@@ -1,0 +1,58 @@
+---
+
+- hosts: all
+  vars_files:
+    - server_var.yml
+    - mount_vars.yml
+    - user_vars.yml
+    - docker_vars.yml
+  remote_user: ubuntu
+  become: true
+
+  tasks:
+  # Stop-gap solution for the issue that Ubuntu automatically upgrades
+  # packages upon first login, thus preventing running this playbook
+  # on a completely new VM.
+  - name: Wait for automatic system updates
+    shell: while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 1; done;
+
+  - name: Update apt and install packages
+    apt:
+      update_cache: yes
+      name: [emacs-nox, zsh, csh, tcsh, curl, wget, screen, tmux, net-tools, ufw, whois, git, htop, coreutils, build-essential]
+      autoremove: yes
+
+  - include: mount_storage.yml
+    loop: "{{ mounts }}"
+
+  - include: firewall.yml
+
+# Only include when requiring a new license
+# Usually, one should copy the current one from a backup when re-installing the VM
+  - include: letsencrypt.yml
+
+  - include: docker.yml
+
+  - include: jupyterhub.yml
+
+  - include: nginx.yml
+
+  - include: setup_umask.yml
+
+  - include: addusers.yml
+    loop: "{{ users }}"
+
+  - include: ssh_access.yml
+
+  - include: thredds.yml
+
+  - include: vsftpd.yml
+
+  - name: Restart nginx and JupyterHub services
+    block:
+      - systemd:
+          name: nginx
+          state: restarted
+      - systemd:
+          name: jupyterhub
+          state: restarted

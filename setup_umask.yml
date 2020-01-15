@@ -1,0 +1,15 @@
+- name: Set up non-world accessible default umask
+  block:
+    - lineinfile:
+        path: /etc/login.defs
+        regexp: '^UMASK'
+        state: present
+        line: UMASK 027
+    # Allow root & ubuntu to be world-readable, for software installation
+    - lineinfile:
+        path: "{{ filename }}"
+        state: present
+        line: umask 0022
+      loop: [ /root/.bashrc, /home/ubuntu/.bashrc ]
+      loop_control:
+        loop_var: filename

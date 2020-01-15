@@ -1,0 +1,117 @@
+# Note that we require Java 8: the GeoTools Java library is
+# incompatible with Java 9+. See e.g. the related item at
+# https://stackoverflow.com/questions/47888812
+- name: Install tomcat
+  apt:
+    name: [tomcat8, openjdk-8-jre]
+
+# Stop tomcat8 service before making changes
+- name: Stop tomcat service
+  systemd:
+    name: tomcat8
+    state: stopped
+
+- name: Install thredds WAR file
+  get_url:
+    url: ftp://ftp.unidata.ucar.edu/pub/thredds/4.6/current/thredds.war
+    dest: /var/lib/tomcat8/webapps/thredds.war
+    owner: tomcat8
+    group: tomcat8
+
+# Write /usr/share/tomcat8/bin/setenv.sh with java options
+- name: Create tomcat setenv.sh
+  copy:
+    dest: /usr/share/tomcat8/bin/setenv.sh
+    owner: root
+    group: root
+    mode: 0755
+    content: |
+      #! /bin/sh
+      # We need to set JAVA_HOME, to override the default Java version
+      export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre
+
+      CONTENT_ROOT=-Dtds.content.root.path=$CATALINA_BASE/content/
+      # set java prefs related variables (used by the wms service, for example)
+      JAVA_PREFS_ROOTS="-Djava.util.prefs.systemRoot=$CATALINA_BASE/content/thredds/javaUtilPrefs \
+                        -Djava.util.prefs.userRoot=$CATALINA_BASE/content/thredds/javaUtilPrefs"
+      # Some commonly used JAVA_OPTS settings:
+      NORMAL="-Xmx4096m -Xms512m -server -ea"
+      HEAP_DUMP="-XX:+HeapDumpOnOutOfMemoryError"
+      HEADLESS="-Djava.awt.headless=true"
+      # Standard setup.
+      JAVA_OPTS="$CONTENT_ROOT $NORMAL $MAX_PERM_GEN $HEAP_DUMP $HEADLESS $JAVA_PREFS_ROOTS"
+      export JAVA_OPTS
+
+# Create /var/lib/tomcat8/content; this doesn't happen automatically
+- name: Create tomcat & THREDDS content dir
+  file:
+    path: /var/lib/tomcat8/content
+    state: directory
+    owner: tomcat8
+    group: tomcat8
+
+
+# Start tomcat; this should unpack the thredds.war file
+- name: Start tomcat service
+  systemd:
+    name: tomcat8
+    enabled: yes
+    state: started
+
+# Wait until thredds.war has been unpacked
+- name: Wait for THREDDS directory creation
+  wait_for:
+    path: /var/lib/tomcat8/content/thredds/catalog.xml
+    state: present
+
+# Add new (dynamic) catalog to /var/lib/tomcat8/content/thredds:
+- name: Create THREDDS dynamic catalog
+  copy:
+    dest: /var/lib/tomcat8/content/thredds/cmip5Catalog.xml
+    owner: tomcat8
+    group: tomcat8
+    content: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <catalog name="Unidata Workshop 2006 - NCEP Model Data" version="1.0.1"
+          xmlns="http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0"
+          xmlns:xlink="http://www.w3.org/1999/xlink">
+        <service name="all" base="" serviceType="compound">
+          <service name="odap" serviceType="OpenDAP" base="/thredds/dodsC/" />
+          <service name="dap4" serviceType="DAP4" base="/thredds/dap4/" />
+          <service name="http" serviceType="HTTPServer" base="/thredds/fileServer/" />
+          <service name="wcs" serviceType="WCS" base="/thredds/wcs/" />
+          <service name="wms" serviceType="WMS" base="/thredds/wms/" />
+          <!--service name="ncss" serviceType="NetcdfSubset" base="/thredds/ncss/" /-->
+        </service>
+        <service name="dap" base="" serviceType="compound">
+          <service name="odap" serviceType="OpenDAP" base="/thredds/dodsC/" />
+          <service name="dap4" serviceType="DAP4" base="/thredds/dap4/" />
+        </service>
+        <datasetScan name="CMIP5 Data" path="cmip5" location="/mnt/data/data1/thredds/cmip5/" >
+          <serviceName>all</serviceName>
+          <filter>
+            <include wildcard="*.nc"/>
+          </filter>
+        </datasetScan >
+      </catalog>
+
+- name: Recreate main catalog.xml file
+  template:
+    src: catalog-thredds.xml
+    dest: /var/lib/tomcat8/content/thredds/catalog.xml
+    mode: 0640
+    owner: tomcat8
+    group: tomcat8
+
+- name: Activate WCS and WMS services
+  template:
+    src: threddsConfig.xml
+    dest: /var/lib/tomcat8/content/thredds/threddsConfig.xml
+    mode: 0640
+    owner: tomcat8
+    group: tomcat8
+
+- name: Restart tomcat service
+  systemd:
+    name: tomcat8
+    state: restarted

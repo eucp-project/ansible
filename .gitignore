@@ -1,0 +1,5 @@
+mount_vars.yml
+user_vars.yml
+server_var.yml
+hosts
+ansible.cfg

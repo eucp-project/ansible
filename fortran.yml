@@ -1,0 +1,14 @@
+# Install various GFortran version
+# gfortran 8 is the most recent, but it's not available in the default repository
+- name: Install apt utilities
+  apt:
+    name: [software-properties-common]
+    autoremove: yes
+
+- name: add Ubuntu test PPA
+  command: add-apt-repository --yes ppa:ubuntu-toolchain-r/test
+
+- name: Install GFortran versions
+  apt:
+    name: [gfortran, gfortran-5, gfortran-8]
+    autoremove: yes

@@ -1,0 +1,5 @@
+Change /etc/ssh/sshd_config:
+PasswordAuthentication=yes
+Then restart: systemctl restart sshd ; systemctl status sshd
+
+

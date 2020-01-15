@@ -1,0 +1,17 @@
+Log in to root:
+
+apt update
+apt install software-properties-common
+add-apt-repository universe
+add-apt-repository ppa:certbot/certbot
+apt update
+
+apt install certbot python3-certbot-nginx
+
+# Test first
+certbot certonly -d lab.eucp-project.eu,server.eucp-nlesc.surf-hosted.nl --agree-tos -m e.rol@esciencecenter.nl -n --nginx  --dry-run
+# Run
+certbot certonly -d lab.eucp-project.eu,server.eucp-nlesc.surf-hosted.nl --agree-tos -m e.rol@esciencecenter.nl -n --nginx
+
+
+# Update /etc/nginx/sites-enables/jupyterhub.conf with the info for the new certificate (fullchain.epm and privkey.pem files).

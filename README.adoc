@@ -1,0 +1,57 @@
+# Ansible playbook for EUCP notebook server
+
+This directory contains the Ansible playbook to set up a virtual
+machine (VM) with a JupyterHub, for use within the EUCP. The VM tested
+has been a Ubuntu 18.04 (LTS) system. The current setup uses one
+running in the SURF HPC cloud.
+
+Run as follows:
+
+    ansible-playbook hpccloud-playbook.yml
+
+Note that the `ansible.cfg` template file in this repository directory
+points to the Ansible inventory, or specifically, the `hosts` file (a
+template file is given in this directory), which sets the host(s) to
+run the installation on. Update `hosts` as necessary for your
+situation; you can use host aliases defined in your $HOME/.ssh/config
+file.
+
+
+Running the playbook performs the following steps:
+
+* Installation of some standard (Ubuntu) packages
+* Creation and mounting of data storage virtual disks
+* Downloading and installation of MiniConda
+** Installation of JupyterHub, JupyterLab and a few extensions (for
+   Python version 3.6)
+* Setup running for JupyterHub under a separate account
+** Sudo access for JupyterHub group to spawn a JupyterLab for each
+   account
+** Systemd setup for JupyterHub
+* Creation of user accounts with random passwords
+
+## Data disks
+
+The creation and mounting of data storage uses an Ansible variable
+file, `mount_vars.yml`, to match devices and mount points. Every
+device is xfs formatted and mounted under `/mnt/data/<dir>/`. Create
+the `mount_vars.yml` file from the `mount_vars_template.yml` template.
+If you don't need any data disks mounted, provide an empty list:
+
+    mounts: []
+
+
+## User accounts
+
+The Ansible playbook can automatically create users with a random
+password and with the correct groups. The user name and corresponding
+main group are listed in the `user_vars.yml` file as a list of
+mappings. Copy the `user_vars_template.yml` to `user_vars.yml` and
+edit it accordingly. If you don't need any users right now, make the
+`users` variable an empty list:
+
+    users: []
+
+Note: when adding users yourself, make sure that their (secondary)
+groups are `users` and `jupyterhub`, otherwise new users will not be
+able to start a JupyterLab.
