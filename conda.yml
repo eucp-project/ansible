@@ -32,10 +32,6 @@
         - sudospawner
         - dockerspawner
         - numpy
-        - scipy
-        - matplotlib
-        - netcdf4
-        - pandas
 
     - file:
         path: /opt/conda
