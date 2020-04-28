@@ -35,9 +35,9 @@
   shell: usermod -a -G shadow www-data
 
 - name: Store PAM user and group access restrictions for Nginx - THREDDS access
-  file:
+  copy:
     src: nginx-conf/pam/{{ item }}
     dest: /etc/pam.d/{{ item }}
   loop:
-    - nginx_restricted_cp-rcm
-    - nginx_restricted_groups_cp-rcm
+    - "nginx_restricted_cp-rcm"
+    - "nginx_restricted_groups_cp-rcm"
