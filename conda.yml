@@ -16,10 +16,10 @@
       args:
         creates: /opt/conda
     - command: /opt/conda/bin/conda update --yes --quiet conda
-    - command: /opt/conda/bin/conda install --yes --quiet --channel conda-forge python=3.6
+    - command: /opt/conda/bin/conda create --name jupyterhub --yes --quiet --channel conda-forge python=3.7
       args:
-        creates: /opt/conda/lib/python3.6/
-    - command: /opt/conda/bin/conda install --yes --quiet --channel conda-forge {{ item }}
+        creates: /opt/conda/envs/jupyterhub/
+    - command: /opt/conda/bin/conda install --name jupyterhub --yes --quiet --channel conda-forge {{ item }}
       args:
         creates: /opt/conda/pkgs/{{ item }}-*bz2
       # TODO: fix version numbers for each package once we have a full and compatible installation

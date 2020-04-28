@@ -10,10 +10,10 @@
           After=network-online.target
 
           [Service]
-          Environment="PATH=/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+          Environment="PATH=/opt/conda/envs/jupyterhub/bin:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
           Environment="PYTHONPATH=/etc/jupyterhub"
           User=jupyterhub
-          ExecStart=/opt/conda/bin/jupyterhub -f /etc/jupyterhub/jupyterhub_config.py
+          ExecStart=/opt/conda/envs/jupyterhub/bin/jupyterhub -f /etc/jupyterhub/jupyterhub_config.py
           WorkingDirectory=/etc/jupyterhub
           # Requires a recent systemd version
           #StandardOutput=file:/var/log/jupyterhub.log
