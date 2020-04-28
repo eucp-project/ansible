@@ -23,7 +23,7 @@
     src: nginx-conf/includes/{{ item }}
     dest: /etc/nginx/includes/{{ item }}
     mode: 0644
-  loop: [certificates.conf lab_help.conf thredds.conf jupyterhub.conf]
+  loop: [certificates.conf, lab_help.conf, thredds.conf, jupyterhub.conf]
 
 - name: Symlink JupyterHub nginx configuration file to active sites
   file:
