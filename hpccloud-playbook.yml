@@ -19,7 +19,7 @@
   - name: Update apt and install packages
     apt:
       update_cache: yes
-      name: [emacs-nox, zsh, csh, tcsh, curl, wget, screen, tmux, net-tools, ufw, whois, git, htop, coreutils, build-essential]
+      name: [emacs-nox, zsh, csh, tcsh, curl, wget, screen, tmux, net-tools, ufw, whois, git, htop, coreutils, build-essential, acl]
       autoremove: yes
 
   - include: mount_storage.yml
