@@ -16,8 +16,10 @@ c.DockerSpawner.volumes = {'/mnt/users': {'bind': '/home/{username}/_users', 'mo
                            '/mnt/data/data1/thredds': {'bind': '/home/{username}/_data', 'mode': 'ro'},
                            '/mnt/data/data2/cordex-fpsc': {'bind': '/home/{username}/_cordex-fpsc', 'mode': 'ro'},
 }
-c.DockerSpawner.image = '{{ docker_image }}'
-
+# c.DockerSpawner.image = '{{ docker_image }}'
+c.DockerSpawner.image_whitelist = {'latest': 'eucp/notebook:latest',
+                                   'stable': 'eucp/notebook:stable',
+                                   }
 
 # Turn off; minimize non-essential warnings & errors in the logs
 c.PAMAuthenticator.open_sessions = False
