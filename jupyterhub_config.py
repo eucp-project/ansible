@@ -17,8 +17,9 @@ c.DockerSpawner.volumes = {'/mnt/users': {'bind': '/home/{username}/_users', 'mo
                            '/mnt/data/data2/cordex-fpsc': {'bind': '/home/{username}/_cordex-fpsc', 'mode': 'ro'},
 }
 # c.DockerSpawner.image = '{{ docker_image }}'
-c.DockerSpawner.image_whitelist = {'latest': 'eucp/notebook:latest',
-                                   'stable': 'eucp/notebook:stable',
+c.DockerSpawner.image_whitelist = {'original': 'eucp/notebook:1.0.0',
+                                   'latest': 'eucp/notebook:latest',
+                                   '1.0.0': 'eucp/notebook:1.0.0', 
                                    }
 
 # Turn off; minimize non-essential warnings & errors in the logs
