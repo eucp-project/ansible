@@ -25,4 +25,4 @@
     state: started
 
 - name: Prepull the Docker image
-  shell: docker pull {{ docker_image }}
+  shell: docker pull -a eucp/notebook
