@@ -15,6 +15,7 @@ c.SystemUserSpawner.host_homedir_format_string = '/mnt/users/{username}'
 c.DockerSpawner.volumes = {'/mnt/users': {'bind': '/home/{username}/_users', 'mode': 'ro'},
                            '/mnt/data/data1/thredds': {'bind': '/home/{username}/_data', 'mode': 'ro'},
                            '/mnt/data/data2/cordex-fpsc': {'bind': '/home/{username}/_cordex-fpsc', 'mode': 'ro'},
+                           '/mnt/data/data3/additional_data': {'bind': '/home/{username}/_additional_data', 'mode': 'rw'},
 }
 c.DockerSpawner.image = '{{ docker_image }}'
 
