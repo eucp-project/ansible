@@ -13,9 +13,12 @@ c.SystemUserSpawner.environment = {'JUPYTER_ENABLE_LAB': '1', 'GRANT_SUDO': '1',
                                    'CDAT_ANONYMOUS_LOG': 'no'}
 c.SystemUserSpawner.host_homedir_format_string = '/mnt/users/{username}'
 c.DockerSpawner.volumes = {'/mnt/users': {'bind': '/home/{username}/_users', 'mode': 'ro'},
-                           '/mnt/data': {'bind': '/home/{username}/_data', 'mode': 'ro'},
+                           #'/mnt/data/data1/thredds': {'bind': '/home/{username}/_data', 'mode': 'ro'},
                            '/mnt/data/data2/cordex-fpsc': {'bind': '/home/{username}/_cordex-fpsc', 'mode': 'ro'},
                            '/mnt/data/data3/additional_data': {'bind': '/home/{username}/_additional_data', 'mode': 'rw'},
+                           '/mnt/data/data1/cp-rcm': {'bind': '/home/{username}/_cp-rcm'},
+                           '/mnt/data/data2/hclim-knmi': {'bind': '/home/{username}/_hclim_knmi'},
+                           '/mnt/data/data3/ALP-3/HCLIMcom': {'bind': '/home/{username}/_HCLIMcom'},
 }
 c.DockerSpawner.image = '{{ docker_image }}'
 
