@@ -26,12 +26,12 @@
       # This may speed up conda trying to match dependencies
       # TODO2: install all packages at once; this may speed up resolving dependencies
       loop:
-        - jupyterhub
-        - notebook
-        - jupyterlab
-        - sudospawner
-        - dockerspawner
-        - numpy
+        - jupyterhub = 1.1.0
+        - notebook = 6.0.3
+        - jupyterlab = 2.1.1
+        - sudospawner = 0.5.2
+        - dockerspawner = 0.11.1
+        - numpy = 1.18.1
 
     - file:
         path: /opt/conda
